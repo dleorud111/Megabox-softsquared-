@@ -70,57 +70,14 @@ try {
 //            echo json_encode($res, JSON_NUMERIC_CHECK);
 //            break;
 
-        /*
-         * API No. 2
-         * API Name : 회원가입 API
-         * 마지막 수정 날짜 : 19.04.29
-         */
-        case "postUser":
-            http_response_code(200);
 
-            if (isValidId($req->id)) {
-                $res->isSuccess = FALSE;
-                $res->code = 201;
-                $res->message = "아이디 중복입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-            }
-//            else if(!isValidPassword($req->pwd)){
-//                $res->isSuccess = FALSE;
-//                $res->code = 202;
-//                $res->message = "잘못된 비밀번호 형식입니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//            }
-            else if (!isValidPhone($req->phone)) {
-                $res->isSuccess = FAlSE;
-                $res->code = 202;
-                $res->message = "잘못된 핸드폰 번호 형식입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-            } else if (!isValidBirth($req->birth)) {
-                $res->isSuccess = FAlSE;
-                $res->code = 203;
-                $res->message = "잘못된 생년월일 형식입니다";
-                echo json_encode($res, JSON_NUMERIC_CHECK);
-            }
-
-            $id = $req->id;
-            $server_id = $req->server_id;
-            //$pwd_hash = password_hash($req->pwd, PASSWORD_DEFAULT); // Password Hash
-            $name = $req->name;
-            $phone = $req->phone;
-            $birth = $req->birth;
-
-            postUser($id, $server_id, $name, $phone, $birth);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "회원가입 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
-            break;
 
         /*
          * API No. 1
          * API Name : 자체 로그인 API
          * 마지막 수정 날짜 : 19.04.29
          */
+
         case "login":
             http_response_code(200);
 
@@ -143,13 +100,6 @@ try {
 
             curl_close($ch);
 
-//            if($accessToken != $response){
-//                $res->isSuccess = FALSE;
-//                $res->code = 201;
-//                $res->message = "토큰이 일치하지 않습니다";
-//                echo json_encode($res, JSON_NUMERIC_CHECK);
-//                return;
-//            }
 
             if ($status_code == 200) {
                 $profileResponse = json_decode($response);
@@ -161,7 +111,7 @@ try {
                     $res->code = 201;
                     $res->message = "존재하지 않는 유저입니다. 회원가입을 하세요";
                     echo json_encode($res, JSON_NUMERIC_CHECK);
-                    return;
+                    break;
                 }
                 $userIdx = getUserIdxByID($server_id);
                 $jwt = getJWT($userIdx, JWT_SECRET_KEY);
@@ -175,10 +125,93 @@ try {
                 break;
 
             } else {
-                echo "Error 내용:" . $response;
-
-
+                $res->isSuccess = FALSE;
+                $res->code = 202;
+                $res->message = "인증되지 않은 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
             }
+
+        /*
+         * API No. 2
+         * API Name : 회원가입 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+
+        case "postUser":
+            http_response_code(200);
+
+            if (isValidId($req->id)) {
+                $res->isSuccess = FALSE;
+                $res->code = 201;
+                $res->message = "아이디 중복입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+            else if (!isValidPhone($req->phone)) {
+                $res->isSuccess = FAlSE;
+                $res->code = 202;
+                $res->message = "잘못된 핸드폰 번호 형식입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            } else if (!isValidBirth($req->birth)) {
+                $res->isSuccess = FAlSE;
+                $res->code = 203;
+                $res->message = "잘못된 생년월일 형식입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $id = $req->id;
+            $server_id = $req->server_id;
+            $name = $req->name;
+            $phone = $req->phone;
+            $birth = $req->birth;
+
+            postUser($id, $server_id, $name, $phone, $birth);
+            $res->isSuccess = TRUE;
+            $res->code = 100;
+            $res->message = "회원가입 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 3
+         * API Name : 메인화면 영화 나열 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getMovies":
+            http_response_code(200);
+
+            $hash_tag = $_GET["hash-tag"];
+
+            if($hash_tag == "필소"){
+                $hash_tag = "필름소사이어티";
+            }
+
+            if($hash_tag=="박스오피스"){
+                $res->result = getMovies();
+                $res->is_success = TRUE;
+                $res->code = 100;
+                $res->message = "영화 순위 나열 성공";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+            }
+            else if($hash_tag=='상영예정' || $hash_tag=='빵원티켓' || $hash_tag=='단독' || $hash_tag=='오리지널티켓'
+                || $hash_tag=='필름소사이어티'){
+                $res->result = getHashTagMovies($hash_tag);
+                $res->is_success = TRUE;
+                $res->code = 101;
+                $res->message = "해시태그별 영화 나열 성공";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+            }
+            else{
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "해시태그를 확인하세요";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+            }
+
+            break;
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);

@@ -15,18 +15,18 @@ function isValidUser($ID, $pwd){
     return password_verify($pwd, $res[0]['hash']);
 
 }
-function getUserIdxByID($ID)
+function getUserIdxByID($server_id)
 {
     $pdo = pdoSqlConnect();
-    $query = "SELECT userIdx FROM Users WHERE ID = ?;";
+    $query = "SELECT idx FROM USER WHERE server_id = ?;";
 
     $st = $pdo->prepare($query);
-    $st->execute([$ID]);
+    $st->execute([$server_id]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
 
     $st = null;
     $pdo = null;
 
-    return $res[0]['userIdx'];
+    return $res[0]['idx'];
 }

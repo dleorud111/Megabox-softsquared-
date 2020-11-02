@@ -3,6 +3,7 @@
 require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
 require './pdos/JWTPdo.php';
+require './pdos/MoviePdo.php';
 require './vendor/autoload.php';
 
 use \Monolog\Logger as Logger;
@@ -27,12 +28,13 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     //$r->addRoute('POST', '/user', ['IndexController', 'createUser']); // 비밀번호 해싱 예시 추가
 
 
-    /* ********************************회원가입 및 로그인******************************** */
+    /* ******************************** 회원가입 및 로그인 ******************************** */
     $r->addRoute('POST', '/login', ['IndexController', 'login']); //소셜 로그인 API
     $r->addRoute('POST', '/user', ['IndexController', 'postUser']); //회원가입 API
 
 
-
+    /* ******************************** 영화 순위 및 상세정보 ******************************** */
+    $r->addRoute('GET', '/movie', ['IndexController', 'getMovies']);
 
 
 
