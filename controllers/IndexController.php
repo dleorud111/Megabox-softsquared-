@@ -106,7 +106,7 @@ try {
                 $server_id = $profileResponse->response->id;
 
                 if (!isValidNaverUser($server_id)) {
-                    $res->result["server_id"] = $server_id;
+                    $res->result["jwt"] = $server_id;  //원래 "server_id"인데 클라 요구로 jwt로 변경
                     $res->is_success = FALSE;
                     $res->code = 201;
                     $res->message = "존재하지 않는 유저입니다. 회원가입을 하세요";
@@ -269,10 +269,81 @@ try {
             $res->is_success = TRUE;
             $res->code = 100;
             $res->message = "영화 상세정보 조회 성공";
-            echo json_encode($res,JSON_NUMERIC_CHECK);
-
-
+            echo json_encode($res);
             break;
+
+        /*
+         * API No. 9
+         * API Name : 영화 보고싶어 누르기 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "chgMovieHeart":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+            $movie_idx = $vars['movie_idx'];
+
+            $res->result = chgMovieHeart($user_idx, $movie_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 보고싶어 누르기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 10
+         * API Name : 극장 좋아요 누르기 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "chgBranchLike":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+            $branch_idx = $vars['branch_idx'];
+
+            $res->result = chgBranchLike($user_idx, $branch_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "선호 극장 누르기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);

@@ -33,11 +33,13 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/user', ['IndexController', 'postUser']); //회원가입 API
 
 
-    /* ******************************** 영화 순위 및 상세정보 ******************************** */
+    /* ******************************** 영화 관련 기능 ******************************** */
     $r->addRoute('GET', '/movie', ['IndexController', 'getMovies']); //메인화면 영화 순위 나열
     $r->addRoute('GET', '/movie/{movie_idx}/movie-intro', ['IndexController', 'getMovieIntro']); //영화 간단 소개(포스터 터치 후 위)
     $r->addRoute('GET', '/movie/{movie_idx}/movie-info', ['IndexController', 'getMovieInfo']); //영화 상세 정보(포스터 터치 후 아래)
 
+    $r->addRoute('PATCH', '/movie/{movie_idx}/like', ['IndexController', 'chgMovieHeart']); //영화 보고싶어(찜하기)
+    $r->addRoute('PATCH', '/branch/{branch_idx}/like', ['IndexController', 'chgBranchLike']); //극장 좋아요
 
 
 

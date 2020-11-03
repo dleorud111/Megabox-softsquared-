@@ -262,3 +262,74 @@ function getMovieInfo($movie_idx){
 
     return $res;
 }
+
+// JWT 토큰 유효성 검사
+function isValidHeader($jwt, $key)
+{
+    try{
+        $id = getDataByJWToken($jwt, $key)->userIdx;
+        return isValidUserJWT($id);
+    } catch (\Exception $e) {
+        return false;
+    }
+}
+
+// 유저 유효성 검사
+function isValidUserJWT($id)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select idx from USER where idx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+}
+
+// 영화 보고싶어 누르기
+function chgMovieHeart($user_idx, $movie_idx){
+    $pdo = pdoSqlConnect();
+    $query = "update ZZIM set status = if(status=1,0,1) where user_idx=? and movie_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx, $movie_idx]);
+
+    $query = "select ZZIM.user_idx, ZZIM.movie_idx, k_name,status
+              from MOVIE, ZZIM
+              where MOVIE.movie_idx = ZZIM.movie_idx and user_idx = ? and ZZIM.movie_idx = ?;";
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx, $movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+// 극장 좋아요 누르기
+function chgBranchLike($user_idx, $branch_idx){
+    $pdo = pdoSqlConnect();
+    $query = "update LIKE_BRANCH set status = if(status=1,0,1) where user_idx=? and branch_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx, $branch_idx]);
+
+    $query = "select LIKE_BRANCH.user_idx, LIKE_BRANCH.branch_idx, branch_name,status
+              from BRANCH, LIKE_BRANCH
+              where BRANCH.branch_idx = LIKE_BRANCH.branch_idx and user_idx = ? and LIKE_BRANCH.branch_idx = ?;";
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx, $branch_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
