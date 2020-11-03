@@ -106,7 +106,7 @@ try {
                 $server_id = $profileResponse->response->id;
 
                 if (!isValidNaverUser($server_id)) {
-                    $res->result["server_id"] = (string)$server_id;
+                    $res->result["server_id"] = $server_id;
                     $res->isSuccess = FALSE;
                     $res->code = 201;
                     $res->message = "존재하지 않는 유저입니다. 회원가입을 하세요";
@@ -115,7 +115,6 @@ try {
                 }
                 $userIdx = getUserIdxByID($server_id);
                 $jwt = getJWT($userIdx, JWT_SECRET_KEY);
-
 
                 $res->result["jwt"] = $jwt;
                 $res->isSuccess = TRUE;
@@ -148,15 +147,22 @@ try {
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
-            else if (!isValidPhone($req->phone)) {
+            else if (isValidServerId($req->server_id)) {
                 $res->isSuccess = FAlSE;
                 $res->code = 202;
+                $res->message = "존재하는 서버 아이디입니다.서버 아이디값을 확인하세요";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+            else if (!isValidPhone($req->phone)) {
+                $res->isSuccess = FAlSE;
+                $res->code = 203;
                 $res->message = "잘못된 핸드폰 번호 형식입니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             } else if (!isValidBirth($req->birth)) {
                 $res->isSuccess = FAlSE;
-                $res->code = 203;
+                $res->code = 204;
                 $res->message = "잘못된 생년월일 형식입니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
@@ -175,6 +181,7 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+/* ************************************* 영화 관련 ************************************* */
         /*
          * API No. 3
          * API Name : 메인화면 영화 나열 API
@@ -207,9 +214,63 @@ try {
             else{
                 $res->is_success = FALSE;
                 $res->code = 201;
-                $res->message = "해시태그를 확인하세요";
+                $res->message = "잘못된 해시태그입니다";
                 echo json_encode($res,JSON_NUMERIC_CHECK);
             }
+            break;
+
+
+        /*
+         * API No. 4
+         * API Name : 영화 간단 소개 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getMovieIntro":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getMovieIntro($movie_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 간단 소개 성공";
+            echo json_encode($res,JSON_NUMERIC_CHECK);
+
+
+            break;
+
+        /*
+         * API No. 5
+         * API Name : 영화 상세 정보 조회 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getMovieInfo":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getMovieInfo($movie_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 상세정보 조회 성공";
+            echo json_encode($res,JSON_NUMERIC_CHECK);
+
 
             break;
     }

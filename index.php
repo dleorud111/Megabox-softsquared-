@@ -34,8 +34,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
 
     /* ******************************** 영화 순위 및 상세정보 ******************************** */
-    $r->addRoute('GET', '/movie', ['IndexController', 'getMovies']);
-
+    $r->addRoute('GET', '/movie', ['IndexController', 'getMovies']); //메인화면 영화 순위 나열
+    $r->addRoute('GET', '/movie-intro/{movie_idx}', ['IndexController', 'getMovieIntro']); //영화 간단 소개(포스터 터치 후 위)
+    $r->addRoute('GET', '/movie-info/{movie_idx}', ['IndexController', 'getMovieInfo']); //영화 상세 정보(포스터 터치 후 아래)
 
 
 

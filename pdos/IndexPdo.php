@@ -54,19 +54,7 @@ function isValidUserIdx($userIdx)
     return $res[0]['exist'];
 }
 
-
-//function createUser($ID, $pwd, $name)
-//{
-//    $pdo = pdoSqlConnect();
-//    $query = "INSERT INTO Users (ID, pwd, name) VALUES (?,?,?);";
-//
-//    $st = $pdo->prepare($query);
-//    $st->execute([$ID, $pwd, $name]);
-//
-//    $st = null;
-//    $pdo = null;
-//
-//}
+/* ****************************************** 로그인 관련 함수 ****************************************** */
 
 // 네이버 회원확인
 function isValidNaverUser($server_id)
@@ -115,19 +103,21 @@ function isValidId($id)
     return intval($res[0]["exist"]);
 
 }
-// 비밀번호 형식 확인
-function isValidPassword($password){
+// server_id 중복 확인
+function isValidServerId($server_id)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select server_id from USER where server_id = ?) as exist;";
 
-    //영문,숫자,특수문자 중 2가지 이상 조합 10자리 이상(특수문자는 ~!@$%^*+=-?_허용)
-    if(preg_match("/^.*(?=^.{10,}$)(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[~!@$%^*+=-?_]).*$/", $password)
-        ||preg_match("/^.*(?=^.{10,}$)(?=.*[a-zA-Z])(?=.*[0-9]).*$/", $password)
-        ||preg_match("/^.*(?=^.{10,}$)(?=.*[a-zA-Z])(?=.*[~!@$%^*+=-?_]).*$/", $password)
-        ||preg_match("/^.*(?=^.{10,}$)(?=.*[0-9])(?=.*[~!@$%^*+=-?_]).*$/", $password)){
-        return true;
-    }
-    else{
-        return false;
-    }
+    $st = $pdo->prepare($query);
+    $st->execute([$server_id]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+
 }
 
 // 핸드폰 번호 형식 확인
@@ -139,6 +129,9 @@ function isValidPhone($phone){
 function isValidBirth($birth){
     return  preg_match("/^([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[1,2][0-9]|3[0,1]))$/", $birth); //6자리 생년월일
 }
+
+
+/* ****************************************** 영화관련 함수 ****************************************** */
 
 // 영화 순위 나열
 function getMovies()
@@ -195,6 +188,73 @@ function getHashTagMovies($hash_tag)
 
     $st = $pdo->prepare($query);
     $st->execute([$hash_tag]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+// 영화 인덱스 확인
+function isValidMovie($movie_idx){
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select movie_idx from MOVIE where movie_idx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+}
+
+// 영화 간단 소개
+function getMovieIntro($movie_idx){
+    $pdo = pdoSqlConnect();
+    $query = "with MOVIE_RANK as (select @rank := @rank + 1 as ranking, movie_idx from MOVIE,(SELECT @rank := 0) r)
+              select MOVIE.movie_idx, poster,
+                     case when datediff(start_day, curdate()) > 0 then concat('D-',datediff(start_day, curdate()))
+                          when datediff(start_day, curdate()) < 0 then '상영중'
+                     end as movie_status,
+                     hash_tag, k_name, e_name, grade, concat(MOVIE_RANK.ranking, '위') as ranking,
+                     concat('(',reservation,'%)') as reservation, description
+              from MOVIE, MOVIE_RANK
+              where MOVIE.movie_idx = MOVIE_RANK.movie_idx and MOVIE.movie_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+// 영화 상세정보 조회
+function getMovieInfo($movie_idx){
+    $pdo = pdoSqlConnect();
+    $query = "select MOVIE.movie_idx, concat(date_format(start_day, '%Y'),'.',date_format(start_day, '%m'),
+                                            '.',date_format(start_day, '%d')) as start_day,
+                     type, concat(genre,' / ',running_time) as genre, grade, producer, performer,
+                     case when audience = 0 then cast(audience as char(10))
+                          when audience < 10000 then concat(audience div 1000, ',' , audience mod 1000)
+                          when audience >= 10000 then concat(audience div 10000, '.',
+                                                            left(cast(audience mod 10000 as char(10)) ,1),'만')
+                          end as total_audience,
+                          if(today = 0, cast(today as char(10)), concat(today div 1000, ',' , today mod 1000)) as today_audience,
+                          if(today = 0, cast(today as char(10)), concat(truncate(((today-last_day)/last_day)*100,1),'%')) as ratio_last_day,
+                          case when curdate() > start_day then concat('개봉 ',datediff(curdate(),start_day),'일차')
+                               when curdate() < start_day then null
+                          end as how_long_date
+              from MOVIE, DAY_AUDIENCE
+              where MOVIE.movie_idx = DAY_AUDIENCE.movie_idx and  MOVIE.movie_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
     $st = null;
