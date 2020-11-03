@@ -107,7 +107,7 @@ try {
 
                 if (!isValidNaverUser($server_id)) {
                     $res->result["server_id"] = $server_id;
-                    $res->isSuccess = FALSE;
+                    $res->is_success = FALSE;
                     $res->code = 201;
                     $res->message = "존재하지 않는 유저입니다. 회원가입을 하세요";
                     echo json_encode($res, JSON_NUMERIC_CHECK);
@@ -117,14 +117,14 @@ try {
                 $jwt = getJWT($userIdx, JWT_SECRET_KEY);
 
                 $res->result["jwt"] = $jwt;
-                $res->isSuccess = TRUE;
+                $res->is_success = TRUE;
                 $res->code = 100;
                 $res->message = "로그인 성공";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
 
             } else {
-                $res->isSuccess = FALSE;
+                $res->is_success = FALSE;
                 $res->code = 202;
                 $res->message = "인증되지 않은 토큰입니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
@@ -141,27 +141,27 @@ try {
             http_response_code(200);
 
             if (isValidId($req->id)) {
-                $res->isSuccess = FALSE;
+                $res->is_success = FALSE;
                 $res->code = 201;
                 $res->message = "아이디 중복입니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
             else if (isValidServerId($req->server_id)) {
-                $res->isSuccess = FAlSE;
+                $res->is_success = FAlSE;
                 $res->code = 202;
                 $res->message = "존재하는 서버 아이디입니다.서버 아이디값을 확인하세요";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
             else if (!isValidPhone($req->phone)) {
-                $res->isSuccess = FAlSE;
+                $res->is_success = FAlSE;
                 $res->code = 203;
                 $res->message = "잘못된 핸드폰 번호 형식입니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             } else if (!isValidBirth($req->birth)) {
-                $res->isSuccess = FAlSE;
+                $res->is_success = FAlSE;
                 $res->code = 204;
                 $res->message = "잘못된 생년월일 형식입니다";
                 echo json_encode($res, JSON_NUMERIC_CHECK);
@@ -175,7 +175,7 @@ try {
             $birth = $req->birth;
 
             postUser($id, $server_id, $name, $phone, $birth);
-            $res->isSuccess = TRUE;
+            $res->is_success = TRUE;
             $res->code = 100;
             $res->message = "회원가입 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
