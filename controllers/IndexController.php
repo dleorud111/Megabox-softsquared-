@@ -181,7 +181,7 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
-/* ************************************* 영화 관련 ************************************* */
+/* ************************************* 영화 정보 관련 ************************************* */
         /*
          * API No. 3
          * API Name : 메인화면 영화 나열 API
@@ -343,6 +343,116 @@ try {
             $res->message = "선호 극장 누르기 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+
+
+/* ************************************* 영화 예매 관련 ************************************* */
+        /*
+         * API No. 11
+         * API Name : 바로예매(지점 조회) API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getBranchDirectTicketing":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getBranchDirectTicketing($movie_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "상영 지점 조회 성공(바로 예매 눌렀을 때)";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 12
+         * API Name : 바로예매(지점 조회) API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getTheaterDirectTicketing":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+            $branch_idx = $vars['branch_idx'];
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidBranch($branch_idx)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "없는 지점 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getTheaterDirectTicketing($movie_idx, $branch_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "상영 관, 시간 조회 성공(바로 예매 눌렀을 때)";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 13
+         * API Name : 극장별 예매(지점 조회) API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getBranchTicketing":
+            http_response_code(200);
+
+
+            $res->result = getBranchTicketing();
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "극장별 예매 조회 성공(극장별 예매 눌렀을 때)";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+        /*
+         * API No. 14
+         * API Name : 극장별 예매(관,시간 조회) API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getTheaterBranchTicketing":
+            http_response_code(200);
+
+            $branch_idx = $vars['branch_idx'];
+
+            if(!isValidBranch($branch_idx)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "없는 지점 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getTheaterBranchTicketing($branch_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "상영 관, 시간 조회 성공(극장별 예매 눌렀을 때)";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+
+
+
+
+
 
     }
 } catch (\Exception $e) {
