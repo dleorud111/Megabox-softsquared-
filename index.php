@@ -4,6 +4,7 @@ require './pdos/DatabasePdo.php';
 require './pdos/IndexPdo.php';
 require './pdos/JWTPdo.php';
 require './pdos/MoviePdo.php';
+require './pdos/TicketPdo.php';
 require './vendor/autoload.php';
 
 use \Monolog\Logger as Logger;
@@ -13,7 +14,7 @@ date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
 
 //에러출력하게 하는 코드
-//error_reporting(E_ALL); ini_set("display_errors", 1);
+error_reporting(E_ALL); ini_set("display_errors", 1);
 
 //Main Server API
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
@@ -34,20 +35,20 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
 
     /* ******************************** 영화 정보 관련 기능 ******************************** */
-    $r->addRoute('GET', '/movie', ['IndexController', 'getMovies']); //메인화면 영화 순위 나열
-    $r->addRoute('GET', '/movie/{movie_idx}/movie-intro', ['IndexController', 'getMovieIntro']); //영화 간단 소개(포스터 터치 후 위)
-    $r->addRoute('GET', '/movie/{movie_idx}/movie-info', ['IndexController', 'getMovieInfo']); //영화 상세 정보(포스터 터치 후 아래)
+    $r->addRoute('GET', '/movie', ['MovieController', 'getMovies']); //메인화면 영화 순위 나열
+    $r->addRoute('GET', '/movie/{movie_idx}/movie-intro', ['MovieController', 'getMovieIntro']); //영화 간단 소개(포스터 터치 후 위)
+    $r->addRoute('GET', '/movie/{movie_idx}/movie-info', ['MovieController', 'getMovieInfo']); //영화 상세 정보(포스터 터치 후 아래)
 
-    $r->addRoute('PATCH', '/movie/{movie_idx}/like', ['IndexController', 'chgMovieHeart']); //영화 보고싶어(찜하기)
-    $r->addRoute('PATCH', '/branch/{branch_idx}/like', ['IndexController', 'chgBranchLike']); //극장 좋아요
+    $r->addRoute('PATCH', '/movie/{movie_idx}/like', ['MovieController', 'chgMovieHeart']); //영화 보고싶어(찜하기)
+    $r->addRoute('PATCH', '/branch/{branch_idx}/like', ['MovieController', 'chgBranchLike']); //극장 좋아요
 
 
     /* ******************************** 영화 예매 관련 기능 ******************************** */
-    $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['IndexController', 'getBranchDirectTicketing']); // 바로 예매(지점 조회)
-    $r->addRoute('GET', '/movie/{movie_idx}/branch_idx/{branch_idx}/direct-ticketing', ['IndexController', 'getTheaterDirectTicketing']); // 바로 예매(관,시간 조회)
-    $r->addRoute('GET', '/branch-ticketing', ['IndexController', 'getBranchTicketing']); //극장별 예매(지점 조회)
-    $r->addRoute('GET', '/branch-ticketing/branch_idx/{branch_idx}', ['IndexController', 'getTheaterBranchTicketing']); //극장별 예매(관,시간 조회)
-
+    $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['TicketController', 'getBranchDirectTicketing']); // 바로 예매(지점 조회)
+    $r->addRoute('GET', '/movie/{movie_idx}/branch_idx/{branch_idx}/direct-ticketing', ['TicketController', 'getTheaterDirectTicketing']); // 바로 예매(관,시간 조회)
+    $r->addRoute('GET', '/branch-ticketing', ['TicketController', 'getBranchTicketing']); //극장별 예매(지점 조회)
+    $r->addRoute('GET', '/branch_idx/{branch_idx}/branch-ticketing', ['TicketController', 'getTheaterBranchTicketing']); //극장별 예매(관,시간 조회)
+    $r->addRoute('GET', '/theater_info_idx/{theater_info_idx}/movie-seat', ['TicketController', 'getRestSeat']); //해당 영화관 남은 좌석 조회
 
 
 
@@ -117,11 +118,15 @@ switch ($routeInfo[0]) {
                 $vars = $routeInfo[2];
                 require './controllers/JWTController.php';
                 break;
-            /*case 'EventController':
+            case 'MovieController':
                 $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
-                require './controllers/EventController.php';
+                require './controllers/MovieController.php';
                 break;
-            case 'ProductController':
+            case 'TicketController':
+                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+                require './controllers/TicketController.php';
+                break;
+            /*case 'ProductController':
                 $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
                 require './controllers/ProductController.php';
                 break;
