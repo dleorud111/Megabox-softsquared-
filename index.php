@@ -33,24 +33,37 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     /* ******************************** 회원가입 및 로그인 ******************************** */
     $r->addRoute('POST', '/login', ['IndexController', 'login']); //소셜 로그인 API
+
     $r->addRoute('POST', '/user', ['IndexController', 'postUser']); //회원가입 API
 
 
     /* ******************************** 영화 정보 관련 기능 ******************************** */
     $r->addRoute('GET', '/movie', ['MovieController', 'getMovies']); //메인화면 영화 순위 나열
+
     $r->addRoute('GET', '/movie/{movie_idx}/movie-intro', ['MovieController', 'getMovieIntro']); //영화 간단 소개(포스터 터치 후 위)
+
     $r->addRoute('GET', '/movie/{movie_idx}/movie-info', ['MovieController', 'getMovieInfo']); //영화 상세 정보(포스터 터치 후 아래)
+
     $r->addRoute('PATCH', '/movie/{movie_idx}/like', ['MovieController', 'chgMovieHeart']); //영화 보고싶어(찜하기)
+
     $r->addRoute('PATCH', '/branch/{branch_idx}/like', ['MovieController', 'chgBranchLike']); //극장 좋아요
 
 
     /* ******************************** 영화 예매 관련 기능 ******************************** */
     $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['TicketController', 'getBranchDirectTicketing']); //바로 예매(지점 조회)
+
     $r->addRoute('GET', '/movie/{movie_idx}/branch_idx/{branch_idx}/direct-ticketing', ['TicketController', 'getTheaterDirectTicketing']); //바로 예매(관,시간 조회)
+
     $r->addRoute('GET', '/branch-ticketing', ['TicketController', 'getBranchTicketing']); //극장별 예매(지점 조회)
+
     $r->addRoute('GET', '/branch_idx/{branch_idx}/branch-ticketing', ['TicketController', 'getTheaterBranchTicketing']); //극장별 예매(관,시간 조회)
+
+    $r->addRoute('GET', '/movie-ticketing', ['TicketController', 'getMovieTicketing']); //영화별 예매(포스터 나열)
+
     $r->addRoute('GET', '/theater_info_idx/{theater_info_idx}/movie-seat', ['TicketController', 'getRestSeat']); //해당 영화관 남은 좌석 조회
+
     $r->addRoute('POST', '/movie-seat/selecting', ['TicketController', 'putSeat']); //좌석선택
+
     $r->addRoute('GET', '/ticketing/check', ['TicketController', 'getTicket']); //예매확인
 
 

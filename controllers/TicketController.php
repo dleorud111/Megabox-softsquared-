@@ -127,6 +127,21 @@ try {
 
         /*
          * API No. 15
+         * API Name : 영화별 예매(포스터 나열) API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getMovieTicketing":
+            http_response_code(200);
+
+            $res->result = getMovieTicketing();
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 포스터 조회 성공(영화별 예매 눌렀을 때)";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 16
          * API Name : 해당 영화관 남은 좌석 조회 API
          * 마지막 수정 날짜 : 19.04.29
          */
@@ -152,7 +167,7 @@ try {
 
 
         /*
-         * API No. 16
+         * API No. 17
          * API Name : 좌석 선택 API
          * 마지막 수정 날짜 : 19.04.29
          */
@@ -204,7 +219,7 @@ try {
             break;
 
         /*
-         * API No. 17
+         * API No. 18
          * API Name : 예매 확인 조회 API
          * 마지막 수정 날짜 : 19.04.29
          */

@@ -173,6 +173,26 @@ function getRestSeat($theater_info_idx){
     return $res;
 }
 
+// 영화별 예매(포스터 나열)
+function getMovieTicketing(){
+    $pdo = pdoSqlConnect();
+    $query = "select poster, k_name, case when grade='전체관람가' then 'grade_all'
+                            when grade='12세이상관람가' then 'grade_12'
+                            when grade='15세이상관람가' then 'grade_15'
+                            when grade='청소년관람불가' then 'grade_adult'
+                            end as grade
+              from MOVIE;";
+
+    $st = $pdo->prepare($query);
+    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
 // 좌석 선택
 function putSeat($user_idx,$theater_info_idx,$seat){
     $pdo = pdoSqlConnect();
