@@ -115,6 +115,133 @@ try {
             break;
 
         /*
+         * API No. 6
+         * API Name : 영화 실관람평 조회 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getMovieReview":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getMovieReview($movie_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 실관람평 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+        /*
+         * API No. 7
+         * API Name : 영화 실관람평 쓰기 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "postMovieReview":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+
+            $star = $req->star;
+            $comment = $req->comment;
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 203;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidPostReviewWatched($movie_idx, $user_idx)){
+                $res->is_success = FALSE;
+                $res->code = 204;
+                $res->message = "리뷰를 쓸 권한이 없습니다(영화를 시청하지 않았습니다)";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(isValidPostReviewDone($movie_idx, $user_idx)){
+                $res->is_success = FALSE;
+                $res->code = 205;
+                $res->message = "이미 이 영화에 대해 리뷰를 작성했습니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            postMovieReview($movie_idx, $user_idx, $star, $comment);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 실관람평 작성 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 8
+         * API Name : 영화 실관람평에 좋아요 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "chgReviewLike":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+            $review_idx = $vars['review_idx'];
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+
+            $res->result = chgReviewLike($user_idx, $review_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 실관람평에 좋아요 누르기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+
+        /*
          * API No. 9
          * API Name : 영화 보고싶어 누르기 API
          * 마지막 수정 날짜 : 19.04.29

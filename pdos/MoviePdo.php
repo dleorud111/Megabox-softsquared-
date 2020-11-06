@@ -159,6 +159,131 @@ function isValidUserJWT($id)
     return intval($res[0]["exist"]);
 }
 
+// 영화 실관람평 조회
+function getMovieReview($movie_idx){
+    $pdo = pdoSqlConnect();
+
+    $query = "select k_name, star from MOVIE where movie_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['movie_info'] = $st->fetchAll();
+
+    $query = "select concat(count(*),'건') as review_num from REVIEW where movie_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['review_num'] = $st->fetchAll();
+
+    $query = "select concat(substring(id, 1,length(id)-2), '**') as id, 
+                         case when timestampdiff(second, REVIEW.created_at, now()) < 60
+                              then concat(timestampdiff(second, REVIEW.created_at, now()),' 초전')
+                              when timestampdiff(minute, REVIEW.created_at, now()) < 60
+                              then concat(timestampdiff(minute, REVIEW.created_at, now()),' 분전')
+                              when timestampdiff(hour, REVIEW.created_at, now()) < 24
+                              then concat(timestampdiff(hour, REVIEW.created_at, now()),' 시간전')
+                              when timestampdiff(day, REVIEW.created_at, now()) < 30
+                              then concat(timestampdiff(day, REVIEW.created_at, now()),' 일전') end as time,
+                    comment, star, like_num
+              from REVIEW, USER
+              where USER.idx = REVIEW.user_idx and movie_idx = ?
+              order by REVIEW.created_at desc;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['review_list'] = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+// 실관람평 유효성 검사(봤는지)
+function isValidPostReviewWatched($movie_idx, $user_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select user_idx from TICKET_CHECK, THEATER_INFO
+              where TICKET_CHECK.theater_info_idx = THEATER_INFO.theater_info_idx and movie_idx = ? and user_idx = ?
+                    and TICKET_CHECK.updated_at is not null) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx, $user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+}
+
+// 실관람평 유효성 검사(이미 썼는지)
+function isValidPostReviewDone($movie_idx, $user_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select user_idx, movie_idx from REVIEW where movie_idx = ? and user_idx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx, $user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+}
+
+// 영화 실관람평 쓰기
+function postMovieReview($movie_idx, $user_idx, $star, $comment){
+    $pdo = pdoSqlConnect();
+    $query = "insert into REVIEW(movie_idx, user_idx, star, comment, created_at) values (?,?,?,?,now());";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx, $user_idx, $star, $comment]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+// 영화 보고싶어 누르기
+function chgReviewLike($user_idx, $review_idx){
+    $pdo = pdoSqlConnect();
+    try{
+        $pdo->beginTransaction();
+
+        $query = "update REVIEW_LIKE set status = if(status=1,0,1) where user_idx = ? and review_idx = ?;";
+
+        $st = $pdo->prepare($query);
+        $st->execute([$user_idx, $review_idx]);
+
+        $query = "update REVIEW join REVIEW_LIKE on REVIEW.review_idx = REVIEW_LIKE.review_idx
+                  set REVIEW.like_num = IF(status = 1, REVIEW.like_num + 1, REVIEW.like_num - 1)
+                  where REVIEW_LIKE.user_idx = ? and REVIEW.review_idx = ?;";
+
+        $st = $pdo->prepare($query);
+        $st->execute([$user_idx, $review_idx]);
+
+        $query = "select review_idx, user_idx, status
+                  from REVIEW_LIKE
+                  where review_idx = ? and user_idx = ?;";
+        $st = $pdo->prepare($query);
+        $st->execute([$review_idx, $user_idx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+        $pdo->commit();
+
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    } catch (Exception $exception){
+        $pdo->rollback();
+    }
+}
+
 // 영화 보고싶어 누르기
 function chgMovieHeart($user_idx, $movie_idx){
     $pdo = pdoSqlConnect();
@@ -178,8 +303,8 @@ function chgMovieHeart($user_idx, $movie_idx){
         $st->execute([$user_idx, $movie_idx]);
 
         $query = "select ZZIM.user_idx, ZZIM.movie_idx, k_name,status
-              from MOVIE, ZZIM
-              where MOVIE.movie_idx = ZZIM.movie_idx and user_idx = ? and ZZIM.movie_idx = ?;";
+                  from MOVIE, ZZIM
+                  where MOVIE.movie_idx = ZZIM.movie_idx and user_idx = ? and ZZIM.movie_idx = ?;";
         $st = $pdo->prepare($query);
         $st->execute([$user_idx, $movie_idx]);
         $st->setFetchMode(PDO::FETCH_ASSOC);

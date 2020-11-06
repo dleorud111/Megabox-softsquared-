@@ -14,7 +14,7 @@ date_default_timezone_set('Asia/Seoul');
 ini_set('default_charset', 'utf8mb4');
 
 //에러출력하게 하는 코드
-error_reporting(E_ALL); ini_set("display_errors", 1);
+//error_reporting(E_ALL); ini_set("display_errors", 1);
 
 //Main Server API
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
@@ -44,6 +44,12 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('GET', '/movie/{movie_idx}/movie-info', ['MovieController', 'getMovieInfo']); //영화 상세 정보(포스터 터치 후 아래)
 
+    $r->addRoute('GET', '/movie/{movie_idx}/review', ['MovieController', 'getMovieReview']); //영화 실관람평 조회
+
+    $r->addRoute('POST', '/movie/{movie_idx}/review', ['MovieController', 'postMovieReview']); //영화 실관람평 쓰기
+
+    $r->addRoute('PATCH', '/review/{review_idx}/like', ['MovieController', 'chgReviewLike']); // 실관람평에 좋아요
+
     $r->addRoute('PATCH', '/movie/{movie_idx}/like', ['MovieController', 'chgMovieHeart']); //영화 보고싶어(찜하기)
 
     $r->addRoute('PATCH', '/branch/{branch_idx}/like', ['MovieController', 'chgBranchLike']); //극장 좋아요
@@ -65,7 +71,6 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/movie-seat/selecting', ['TicketController', 'putSeat']); //좌석선택
 
     $r->addRoute('GET', '/ticketing/check', ['TicketController', 'getTicket']); //예매확인
-
 
 
 
