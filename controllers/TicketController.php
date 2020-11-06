@@ -150,6 +150,61 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+
+        /*
+         * API No. 16
+         * API Name : 좌석 선택 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "putSeat":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+            $theater_info_idx = $req->theater_info_idx;
+            $seat = $req->seat;
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidTheaterInfo($theater_info_idx)){
+                $res->is_success = FALSE;
+                $res->code = 203;
+                $res->message = "없는 관,시간 정보입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidSameSeat($theater_info_idx, $seat)){
+                $res->is_success = FALSE;
+                $res->code = 204;
+                $res->message = "중복된 좌석 선택입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+
+            $res->result = putSeat($user_idx,$theater_info_idx,$seat);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "해당 영화관 좌석 선택 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);

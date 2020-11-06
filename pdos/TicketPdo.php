@@ -149,31 +149,89 @@ function isValidTheaterInfo($theater_info_idx){
 // 극장별 예매(관,시간 조회)
 function getRestSeat($theater_info_idx){
     $pdo = pdoSqlConnect();
-    try{
-        $query = "select concat(theater_idx,'관') as theater, concat('(', time_format(start_time, '%H:%i'),')') as start_time
-                  from THEATER_INFO where THEATER_INFO.theater_info_idx = ?;";
+    $query = "select concat(theater_idx,'관') as theater, concat('(', time_format(start_time, '%H:%i'),')') as start_time
+              from THEATER_INFO where THEATER_INFO.theater_info_idx = ?;";
 
-        $st = $pdo->prepare($query);
-        $st->execute([$theater_info_idx]);
-        $st->setFetchMode(PDO::FETCH_ASSOC);
-        $res['theater_info'] = $st->fetchAll();
+    $st = $pdo->prepare($query);
+    $st->execute([$theater_info_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['theater_info'] = $st->fetchAll();
 
-        $query = "select seat_type
+    $query = "select seat_type
               from THEATER_INFO, THEATER_SEAT
               where THEATER_INFO.theater_info_idx = THEATER_SEAT.theater_info_idx and
                     THEATER_INFO.theater_info_idx = ? and user_idx is null;";
 
-        $st = $pdo->prepare($query);
-        $st->execute([$theater_info_idx]);
+    $st = $pdo->prepare($query);
+    $st->execute([$theater_info_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['rest_seat'] = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+// 좌석 선택
+function putSeat($user_idx,$theater_info_idx,$seat){
+    $pdo = pdoSqlConnect();
+    try{
+        $pdo->beginTransaction();
+        $seat_split = explode(" ",$seat);
+
+        foreach ($seat_split as $seat_type){
+            $query = "update THEATER_SEAT set user_idx = ? where theater_info_idx = ? and seat_type = ?;";
+            $st = $pdo->prepare($query);
+            $st->execute([$user_idx, $theater_info_idx, $seat_type]);
+        }
+        $query1 = "insert into TICKET_CHECK (user_idx, theater_info_idx, all_price, total_price, created_at)
+                   select user_idx, theater_info_idx, count(*)*10000 as all_price, count(*)*10000 as total_price, now()
+                   from THEATER_SEAT where user_idx = ? and theater_info_idx = ?;";
+
+        $query2 = "select concat(count(*)*10000 div 1000,',', '000원') as price
+                  from THEATER_SEAT
+                  where theater_info_idx = ? and user_idx = ?;";
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$user_idx, $theater_info_idx]);
+
+        $st = $pdo->prepare($query2);
+        $st->execute([$theater_info_idx, $user_idx]);
         $st->setFetchMode(PDO::FETCH_ASSOC);
-        $res['rest_seat'] = $st->fetchAll();
+        $res= $st->fetchAll();
+
+        $pdo->commit();
         $st = null;
         $pdo = null;
 
         return $res;
+
     } catch (Exception $exception){
         $pdo->rollback();
     }
+
+}
+
+// 좌석 선택시 중복 검사
+function isValidSameSeat($theater_info_idx, $seat){
+    $pdo = pdoSqlConnect();
+
+        $seat_split = explode(" ",$seat);
+
+        foreach ($seat_split as $seat_type){
+            $query = "select exists(select theater_info_idx, seat_type 
+                      from THEATER_SEAT 
+                      where theater_info_idx = ? and seat_type = ? and user_idx is null) as exist;";
+            $st = $pdo->prepare($query);
+            $st->execute([$theater_info_idx,$seat_type]);
+            $st->setFetchMode(PDO::FETCH_ASSOC);
+            $res = $st->fetchAll();
+
+            return intval($res[0]["exist"]);
+        }
+            $st = null;
+            $pdo = null;
 
 
 }
