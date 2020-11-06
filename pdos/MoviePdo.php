@@ -7,10 +7,10 @@ function getMovies()
 {
     $pdo = pdoSqlConnect();
     $query = "select @rank := @rank + 1 as ranking, movie_idx, poster,
-                        case when grade='전체관람가' then 'ALL'
-                        when grade='12세이상관람가' then '12'
-                        when grade='15세이상관람가' then '15'
-                        when grade='청소년관람불가' then '청불'
+                        case when grade='전체관람가' then 'grade_all'
+                        when grade='12세이상관람가' then 'grade_12'
+                        when grade='15세이상관람가' then 'grade_15'
+                        when grade='청소년관람불가' then 'grade_adult'
                         end as grade,
                     k_name, reservation,
                         case when datediff(start_day, curdate()) > 0 then concat('D-',datediff(start_day, curdate()))

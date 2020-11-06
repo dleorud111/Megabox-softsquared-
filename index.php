@@ -29,6 +29,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     //$r->addRoute('POST', '/user', ['IndexController', 'createUser']); // 비밀번호 해싱 예시 추가
 
 
+
+
     /* ******************************** 회원가입 및 로그인 ******************************** */
     $r->addRoute('POST', '/login', ['IndexController', 'login']); //소셜 로그인 API
     $r->addRoute('POST', '/user', ['IndexController', 'postUser']); //회원가입 API
@@ -43,13 +45,13 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
 
     /* ******************************** 영화 예매 관련 기능 ******************************** */
-    $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['TicketController', 'getBranchDirectTicketing']); // 바로 예매(지점 조회)
-    $r->addRoute('GET', '/movie/{movie_idx}/branch_idx/{branch_idx}/direct-ticketing', ['TicketController', 'getTheaterDirectTicketing']); // 바로 예매(관,시간 조회)
+    $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['TicketController', 'getBranchDirectTicketing']); //바로 예매(지점 조회)
+    $r->addRoute('GET', '/movie/{movie_idx}/branch_idx/{branch_idx}/direct-ticketing', ['TicketController', 'getTheaterDirectTicketing']); //바로 예매(관,시간 조회)
     $r->addRoute('GET', '/branch-ticketing', ['TicketController', 'getBranchTicketing']); //극장별 예매(지점 조회)
     $r->addRoute('GET', '/branch_idx/{branch_idx}/branch-ticketing', ['TicketController', 'getTheaterBranchTicketing']); //극장별 예매(관,시간 조회)
     $r->addRoute('GET', '/theater_info_idx/{theater_info_idx}/movie-seat', ['TicketController', 'getRestSeat']); //해당 영화관 남은 좌석 조회
-    $r->addRoute('POST', '/ticketing/check', ['TicketController', 'putSeat']); //좌석선택
-
+    $r->addRoute('POST', '/movie-seat/selecting', ['TicketController', 'putSeat']); //좌석선택
+    $r->addRoute('GET', '/ticketing/check', ['TicketController', 'getTicket']); //예매확인
 
 
 

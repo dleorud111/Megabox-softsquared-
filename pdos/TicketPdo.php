@@ -232,6 +232,30 @@ function isValidSameSeat($theater_info_idx, $seat){
         }
             $st = null;
             $pdo = null;
+}
 
+// 예매 확인 조회
+function getTicket($user_idx){
+    $pdo = pdoSqlConnect();
+    $query = "select k_name, date_format(date, '%Y.%m.%d') as date,
+                     case weekday(date) when 0 then '(월)' when 1 then '(화)' when 2 then '(수)'
+                                        when 3 then '(목)' when 4 then '(금)' when 5 then '(금)'
+                                        when 6 then '(토)' when 7 then '(일)' end as day,
+                     concat(time_format(start_time, '%H:%i'),' ~ ', time_format(end_time, '%H:%i')) as runngin_time,
+                     concat(branch_name,' ',theater_idx,'관') as theater,
+                     concat('성인', count(*)) as person_num,
+                     all_price , sale_price, total_price
+              from TICKET_CHECK, THEATER_INFO, MOVIE, BRANCH, THEATER_SEAT
+              where TICKET_CHECK.theater_info_idx = THEATER_INFO.theater_info_idx and BRANCH.branch_idx = THEATER_INFO.branch_idx and
+                    THEATER_INFO.theater_info_idx = THEATER_SEAT.theater_info_idx and THEATER_INFO.movie_idx = MOVIE.movie_idx and
+                    TICKET_CHECK.user_idx = THEATER_SEAT.user_idx and TICKET_CHECK.user_idx = ? and TICKET_CHECK.is_deleted = 0;";
 
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res;
 }

@@ -43,7 +43,7 @@ try {
                 $res->is_success = TRUE;
                 $res->code = 100;
                 $res->message = "영화 순위 나열 성공";
-                echo json_encode($res,JSON_NUMERIC_CHECK);
+                echo json_encode($res, JSON_NUMERIC_CHECK);
             }
             else if($hash_tag=='상영예정' || $hash_tag=='빵원티켓' || $hash_tag=='단독' || $hash_tag=='오리지널티켓'
                 || $hash_tag=='필름소사이어티'){
