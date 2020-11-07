@@ -62,6 +62,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('POST', '/movie-post/{movie_post_idx}/comment', ['MovieController', 'postMoviePostComment']); //무비포스트 댓글 쓰기
 
+    $r->addRoute('PATCH', '/movie-post/{movie_post_idx}/like', ['MovieController', 'chgMoviePostLike']); //무비포스트에 좋아요
 
     /* ******************************** 영화 예매 관련 기능 ******************************** */
     $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['TicketController', 'getBranchDirectTicketing']); //바로 예매(지점 조회)

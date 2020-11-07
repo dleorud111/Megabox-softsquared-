@@ -459,12 +459,61 @@ function isValidMoviePostMine($movie_post_idx, $user_idx)
 // 무비 포스트 댓글 쓰기
 function postMoviePostComment($movie_post_idx, $user_idx, $comment){
     $pdo = pdoSqlConnect();
-    $query = "insert into MOVIE_POST_COMMENT(movie_post_idx, user_idx, comment, created_at) values (?,?,?,now());";
+    try{
+        $pdo->beginTransaction();
+        $query = "insert into MOVIE_POST_COMMENT(movie_post_idx, user_idx, comment, created_at) values (?,?,?,now());";
 
-    $st = $pdo->prepare($query);
-    $st->execute([$movie_post_idx, $user_idx, $comment]);
+        $st = $pdo->prepare($query);
+        $st->execute([$movie_post_idx, $user_idx, $comment]);
 
-    $st = null;
-    $pdo = null;
+        $query = "update MOVIE_POST set comment_num = (select count(*) 
+                                                       from MOVIE_POST_COMMENT 
+                                                       where movie_post_idx = ?) 
+                  where MOVIE_POST.movie_post_idx=?;";
 
+        $st = $pdo->prepare($query);
+        $st->execute([$movie_post_idx, $movie_post_idx]);
+
+        $pdo->commit();
+        $st = null;
+        $pdo = null;
+
+    } catch (Exception $exception){
+        $pdo->rollback();
+    }
+}
+
+// 무비 포스트 좋아요
+function chgMoviePostLike($movie_post_idx, $user_idx)
+{
+    $pdo = pdoSqlConnect();
+    try{
+        $pdo->beginTransaction();
+        $query = "update MOVIE_POST_LIKE set status = if(status=1,0,1) where user_idx=? and movie_post_idx = ?;";
+
+        $st = $pdo->prepare($query);
+        $st->execute([$user_idx, $movie_post_idx]);
+
+        $query = "update MOVIE_POST set like_num = (select count(*) from MOVIE_POST_LIKE 
+                                                    where movie_post_idx = ? and status = 1)
+                  where MOVIE_POST.movie_post_idx=?;";
+
+        $st = $pdo->prepare($query);
+        $st->execute([$movie_post_idx, $movie_post_idx]);
+
+        $query = "select movie_post_idx, user_idx, status from MOVIE_POST_LIKE where movie_post_idx=? and user_idx=?;";
+
+        $st = $pdo->prepare($query);
+        $st->execute([$movie_post_idx, $user_idx]);
+        $st->setFetchMode(PDO::FETCH_ASSOC);
+        $res = $st->fetchAll();
+
+        $pdo->commit();
+        $st = null;
+        $pdo = null;
+
+        return $res;
+    } catch (Exception $exception){
+        $pdo->rollback();
+    }
 }
