@@ -348,3 +348,123 @@ function chgBranchLike($user_idx, $branch_idx){
         $pdo->rollback();
     }
 }
+
+// 영화 무비 포스트 전체 조회
+function getMoviePost($movie_idx){
+    $pdo = pdoSqlConnect();
+
+    $query = "select k_name from MOVIE where movie_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['movie_info'] = $st->fetchAll();
+
+    $query = "select MOVIE_POST.photo, concat(substring(id, 1,length(id)-2), '**') as id, content, like_num, comment_num
+              from MOVIE_POST, USER, MOVIE
+              where MOVIE_POST.user_idx = USER.idx and MOVIE.movie_idx = MOVIE_POST.movie_idx and MOVIE.movie_idx = ?";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['movie_post'] = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+// 영화 무비 포스트 상세 조회
+function getMoviePostDetail($movie_post_idx, $movie_idx){
+    $pdo = pdoSqlConnect();
+
+    $query = "select k_name, MOVIE_POST.photo, concat(substring(id, 1,length(id)-2), '**') as id, 
+                     MOVIE_POST.created_at, content, like_num, comment_num
+              from MOVIE_POST, USER, MOVIE
+              where MOVIE_POST.user_idx = USER.idx and MOVIE.movie_idx = MOVIE_POST.movie_idx and 
+                    movie_post_idx = ? and MOVIE_POST.movie_idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_post_idx, $movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['movie_post'] = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+// 무비 포스트 유효성 검사 (이미 썼는지)
+function isValidMoviePostDone($movie_idx, $user_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select user_idx, movie_idx from MOVIE_POST where movie_idx = ? and user_idx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx, $user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+}
+
+// 무비 포스트 쓰기
+function postMoviePost($movie_idx, $user_idx, $photo, $content){
+    $pdo = pdoSqlConnect();
+    $query = "insert into MOVIE_POST(movie_idx, user_idx, photo, content, created_at) values(?,?,?,?,now());";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx, $user_idx, $photo, $content]);
+
+    $st = null;
+    $pdo = null;
+
+}
+
+// 무비포스트 존재 확인
+function isValidMoviePost($movie_idx){
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select movie_post_idx from MOVIE_POST where movie_post_idx = ?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+}
+
+// 무비 포스트 댓글 쓰기 유효성 검사(내 게시글인지 확인)
+function isValidMoviePostMine($movie_post_idx, $user_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select exists(select movie_post_idx, user_idx from MOVIE_POST where movie_post_idx=? and user_idx=?) as exist;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_post_idx, $user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return intval($res[0]["exist"]);
+}
+
+// 무비 포스트 댓글 쓰기
+function postMoviePostComment($movie_post_idx, $user_idx, $comment){
+    $pdo = pdoSqlConnect();
+    $query = "insert into MOVIE_POST_COMMENT(movie_post_idx, user_idx, comment, created_at) values (?,?,?,now());";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$movie_post_idx, $user_idx, $comment]);
+
+    $st = null;
+    $pdo = null;
+
+}

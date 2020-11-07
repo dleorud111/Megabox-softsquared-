@@ -313,6 +313,172 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        /*
+         * API No. 19
+         * API Name : 영화 무비 포스트 전체 조회 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getMoviePost":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getMoviePost($movie_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 무비 포스트 전체 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 20
+         * API Name : 영화 무비 포스트 상세 조회 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "getMoviePostDetail":
+            http_response_code(200);
+
+            $movie_idx = $vars['movie_idx'];
+            $movie_post_idx = $vars['movie_post_idx'];
+
+            if(!isValidMoviePost($movie_post_idx)){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "없는 무비포스트 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            $res->result = getMoviePostDetail($movie_post_idx, $movie_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 무비 포스트 상세 조회 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 21
+         * API Name : 영화 무비 포스트 쓰기 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "postMoviePost":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+            $movie_idx = $vars['movie_idx'];
+            $photo = $req->photo;
+            $content = $req->content;
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidMovie($movie_idx)){
+                $res->is_success = FALSE;
+                $res->code = 203;
+                $res->message = "없는 영화 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(isValidMoviePostDone($movie_idx, $user_idx)){
+                $res->is_success = FALSE;
+                $res->code = 204;
+                $res->message = "이미 이 영화에 대해 리뷰를 작성했습니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidPostReviewWatched($movie_idx, $user_idx)){
+                $res->is_success = FALSE;
+                $res->code = 205;
+                $res->message = "무비포스트를 쓸 권한이 없습니다(영화를 시청하지 않았습니다)";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            postMoviePost($movie_idx, $user_idx, $photo, $content);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 무비 포스트 쓰기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+        /*
+         * API No. 22
+         * API Name : 영화 무비 포스트 댓글 쓰기 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+        case "postMoviePostComment":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+            $movie_post_idx = $vars['movie_post_idx'];
+            $comment = $req->comment;
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)){
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidMoviePost($movie_post_idx)){
+                $res->is_success = FALSE;
+                $res->code = 203;
+                $res->message = "없는 무비포스트 인덱스입니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(isValidMoviePostMine($movie_post_idx, $user_idx)){
+                $res->is_success = FALSE;
+                $res->code = 204;
+                $res->message = "내가 쓴 무비포스트에는 댓글을 작성할 수 없습니다";
+                echo json_encode($res,JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            postMoviePostComment($movie_post_idx, $user_idx, $comment);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "영화 무비 포스트 댓글 쓰기 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+
     }
 } catch (\Exception $e) {
     return getSQLErrorException($errorLogs, $e, $req);

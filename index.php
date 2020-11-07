@@ -54,6 +54,14 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('PATCH', '/branch/{branch_idx}/like', ['MovieController', 'chgBranchLike']); //극장 좋아요
 
+    $r->addRoute('GET', '/movie/{movie_idx}/movie-post', ['MovieController', 'getMoviePost']); //무비포스트 전체 조회
+
+    $r->addRoute('GET', '/movie/{movie_idx}/movie-post/{movie_post_idx}', ['MovieController', 'getMoviePostDetail']); //무비포스트 상세 조회
+
+    $r->addRoute('POST', '/movie/{movie_idx}/movie-post', ['MovieController', 'postMoviePost']); //무비포스트 쓰기
+
+    $r->addRoute('POST', '/movie-post/{movie_post_idx}/comment', ['MovieController', 'postMoviePostComment']); //무비포스트 댓글 쓰기
+
 
     /* ******************************** 영화 예매 관련 기능 ******************************** */
     $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['TicketController', 'getBranchDirectTicketing']); //바로 예매(지점 조회)
