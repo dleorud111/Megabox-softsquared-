@@ -5,6 +5,7 @@ require './pdos/IndexPdo.php';
 require './pdos/JWTPdo.php';
 require './pdos/MoviePdo.php';
 require './pdos/TicketPdo.php';
+require './pdos/StorePdo.php';
 require './vendor/autoload.php';
 
 use \Monolog\Logger as Logger;
@@ -32,12 +33,14 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
 
     /* ******************************** 회원가입 및 로그인 ******************************** */
+
     $r->addRoute('POST', '/login', ['IndexController', 'login']); //소셜 로그인 API
 
     $r->addRoute('POST', '/user', ['IndexController', 'postUser']); //회원가입 API
 
 
     /* ******************************** 영화 정보 관련 기능 ******************************** */
+
     $r->addRoute('GET', '/movie', ['MovieController', 'getMovies']); //메인화면 영화 순위 나열
 
     $r->addRoute('GET', '/movie/{movie_idx}/movie-intro', ['MovieController', 'getMovieIntro']); //영화 간단 소개(포스터 터치 후 위)
@@ -65,6 +68,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('PATCH', '/movie-post/{movie_post_idx}/like', ['MovieController', 'chgMoviePostLike']); //무비포스트에 좋아요
 
     /* ******************************** 영화 예매 관련 기능 ******************************** */
+
     $r->addRoute('GET', '/movie/{movie_idx}/direct-ticketing', ['TicketController', 'getBranchDirectTicketing']); //바로 예매(지점 조회)
 
     $r->addRoute('GET', '/movie/{movie_idx}/branch_idx/{branch_idx}/direct-ticketing', ['TicketController', 'getTheaterDirectTicketing']); //바로 예매(관,시간 조회)
@@ -81,13 +85,13 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('GET', '/ticketing/check', ['TicketController', 'getTicket']); //예매확인
 
+    /* ******************************** 스토어 관련 기능 ******************************** */
 
+    $r->addRoute('GET', '/store', ['StoreController', 'getTodayMenu']); //오늘의 메뉴 조회(스토어 상단)
 
+    $r->addRoute('GET', '/store/mega-ticket', ['StoreController', 'getMegaTicket']); //메가티켓 조회(스토어 하단)
 
-
-
-
-
+    $r->addRoute('GET', '/store/popcorn-drink-goods', ['StoreController', 'getMenus']); //팝콘, 음료, 굿즈 상품 조회(스토어 하단)
 
 
 //    $r->addRoute('GET', '/users', 'get_all_users_handler');
@@ -153,6 +157,10 @@ switch ($routeInfo[0]) {
             case 'TicketController':
                 $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
                 require './controllers/TicketController.php';
+                break;
+            case 'StoreController':
+                $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
+                require './controllers/StoreController.php';
                 break;
             /*case 'ProductController':
                 $handler = $routeInfo[1][1]; $vars = $routeInfo[2];
