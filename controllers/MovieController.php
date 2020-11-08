@@ -527,6 +527,8 @@ try {
             $res->message = "영화 무비 포스트 좋아요 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
+            
+
 
 
 

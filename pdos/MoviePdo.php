@@ -517,3 +517,6 @@ function chgMoviePostLike($movie_post_idx, $user_idx)
         $pdo->rollback();
     }
 }
+
+
+

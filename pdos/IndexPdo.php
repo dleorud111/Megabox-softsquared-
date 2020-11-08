@@ -129,3 +129,26 @@ function isValidPhone($phone){
 function isValidBirth($birth){
     return  preg_match("/^([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[1,2][0-9]|3[0,1]))$/", $birth); //6자리 생년월일
 }
+
+//theater_info_idx 찾기
+function getTheaterInfoIdx($branch, $theater, $date, $time)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select theater_info_idx, BRANCH.branch_name, concat(theater_idx,'관') as theater,
+                     concat(date_format(date, '%Y'),'.',date_format(date, '%m'),'.',date_format(date, '%d')) as start_day,
+                     time_format(start_time, '%H:%i') as start_time
+              from THEATER_INFO, BRANCH
+              where THEATER_INFO.branch_idx = BRANCH.branch_idx and  branch_name = ? and theater_idx = ? and date = ? and
+                    start_time = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$branch,$theater,$date,$time]);
+    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
