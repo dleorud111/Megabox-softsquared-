@@ -53,7 +53,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('PATCH', '/review/{review_idx}/like', ['MovieController', 'chgReviewLike']); // 실관람평에 좋아요 API
 
-    $r->addRoute('PATCH', '/movie/{movie_idx}/like', ['MovieController', 'chgMovieHeart']); //영화 보고싶어(찜하기) API 
+    $r->addRoute('PATCH', '/movie/{movie_idx}/like', ['MovieController', 'chgMovieHeart']); //영화 보고싶어(찜하기) API
 
     $r->addRoute('PATCH', '/branch/{branch_idx}/like', ['MovieController', 'chgBranchLike']); //극장 좋아요 API
 

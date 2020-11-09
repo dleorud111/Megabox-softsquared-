@@ -276,8 +276,13 @@ try {
                 break;
             }
 
+            $order_id = getOrderId($user_idx);
+            $sale_price = getSalePrice($user_idx);
+            $total_price = getTotalPrice($user_idx);
 
-            $res->result = postPayment($user_idx);
+
+
+            $res->result = postPayment($user_idx,$order_id,$sale_price,$total_price);
             $res->is_success = TRUE;
             $res->code = 100;
             $res->message = "결제 성공";
@@ -312,7 +317,6 @@ try {
                 echo json_encode($res, JSON_NUMERIC_CHECK);
                 break;
             }
-
 
             CallPaymentKakaoPaySuccess($user_idx, $pg_token);
             $res->is_success = TRUE;

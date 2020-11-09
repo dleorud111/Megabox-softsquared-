@@ -306,26 +306,60 @@ function request_curl($url, $is_post=0, $data=array(), $custom_header=null) {
     return $result;
 }
 
-// 티켓 결제 API(결제 창 호출)
-function postPayment($user_idx)
+// 결제 관련 정보가져오기(DB로 부터)
+function getOrderId($user_idx)
 {
-//    $pdo = pdoSqlConnect();
-//    try{
-//    $pdo->beginTransaction();
-//    $query = "select ticket_check_idx, total_price from TICKET_CHECK where user_idx = ? and status = 0;";
-//
-//    $st = $pdo->prepare($query);
-//    $st->execute([$user_idx]);
-//    $st->setFetchMode(PDO::FETCH_ASSOC);
-//    $res = $st->fetchAll();
+    $pdo = pdoSqlConnect();
+    $query = "select ticket_check_idx, sale_price, total_price
+              from TICKET_CHECK
+              where user_idx = ? and status = 0;";
 
-//        $pdo->commit();
-//    $st = null;
-//    $pdo = null;
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
 
-//    } catch (Exception $exception){
-//        $pdo->rollback();
-//    }
+    return $res[0]['ticket_check_idx'];
+}
+function getSalePrice($user_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select ticket_check_idx, sale_price, total_price
+              from TICKET_CHECK
+              where user_idx = ? and status = 0;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['sale_price'];
+}
+function getTotalPrice($user_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select ticket_check_idx, sale_price, total_price
+              from TICKET_CHECK
+              where user_idx = ? and status = 0;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['total_price'];
+}
+
+// 티켓 결제 API(결제 창 호출)
+function postPayment($user_idx,$order_id,$sale_price,$total_price)
+{
+
 
 
     $http_host       = 'https://test.daekyung.shop';
@@ -343,12 +377,12 @@ function postPayment($user_idx)
 
     $kakao_params = array(
         'cid'               => $cid,                                    // 가맹점코드 10자
-        'partner_order_id'  => '5',                   // 주문번호
+        'partner_order_id'  => $order_id,                   // 주문번호
         'partner_user_id'   => $user_idx,                               // 유저 id
         'item_name'         => 'ticket',                                // 상품명
         'quantity'          => '1',                                     // 상품 수량
-        'total_amount'      => '30000',                // 상품 총액
-        'tax_free_amount'   => '0',                                     // 상품 비과세 금액
+        'total_amount'      => $total_price,                // 상품 총액
+        'tax_free_amount'   => $sale_price,                                     // 상품 비과세 금액
         'approval_url'      => $approval_url,                           // 결제성공시 콜백url 최대 255자
         'cancel_url'        => $cancel_url,
         'fail_url'          => $fail_url,
