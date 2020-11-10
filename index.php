@@ -89,6 +89,10 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('GET', '/payment/success', ['TicketController', 'getPayment']); //티켓 결제 성공 API(카카오페이) API
 
+    $r->addRoute('GET', '/ticket', ['TicketController', 'getTicketPayed']); //예매/주문내역 API
+
+    $r->addRoute('GET', '/mobile-ticket', ['TicketController', 'getMobileTicket']); //모바일티켓 조회 API
+
     /* ******************************** 스토어 관련 기능 ******************************** */
 
     $r->addRoute('GET', '/store', ['StoreController', 'getTodayMenu']); //오늘의 메뉴 조회(스토어 상단) API
@@ -99,7 +103,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
 
 
-    /* ******************************** client 요구 uri ******************************** */
+    /* ******************************** client 요구 API ******************************** */
     $r->addRoute('GET', '/branch/{branch}/theater/{theater}/date/{date}/time/{time}', ['IndexController', 'getTheaterInfoIdx']);
 
 

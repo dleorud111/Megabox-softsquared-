@@ -181,6 +181,7 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        //client 요구 API
         case "getTheaterInfoIdx":
             http_response_code(200);
 

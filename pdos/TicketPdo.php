@@ -485,7 +485,81 @@ function CallPaymentKakaoPaySuccess($user_idx, $pg_token)
 
     $st = null;
     $pdo = null;
+}
 
+// 예매/주문 내역 조회
+function getTicketPayed($user_idx){
+    $pdo = pdoSqlConnect();
+    $query = "select k_name, concat(date_format(date, '%Y'),'.',date_format(date, '%m'),'.',date_format(date, '%d')) as start_day,
+                     case weekday(date) when 0 then '(월)' when 1 then '(화)' when 2 then '(수)'
+                                        when 3 then '(목)' when 4 then '(금)' when 5 then '(금)'
+                                        when 6 then '(토)' when 7 then '(일)' end as day,
+                     concat(time_format(start_time, '%H:%i'),'~',time_format(end_time, '%H:%i')) as start_time,
+                     branch_name
+              from TICKET_CHECK, THEATER_INFO, MOVIE, BRANCH
+              where TICKET_CHECK.theater_info_idx = THEATER_INFO.theater_info_idx and THEATER_INFO.movie_idx = MOVIE.movie_idx and
+                    THEATER_INFO.branch_idx = BRANCH.branch_idx and user_idx = ?;";
 
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
 
+    return $res;
+}
+
+//updated_at 여부로 티켓정보 가져오기
+function getTheaterInfo($user_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select theater_info_idx from TICKET_CHECK where user_idx = ? and updated_at is null;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    $st = null;
+    $pdo = null;
+
+    return $res[0]['theater_info_idx'];
+}
+
+// 모바일 티켓 조회
+function getMobileTicket($user_idx, $theater_info_idx){
+    $pdo = pdoSqlConnect();
+    $query = "select k_name, type, grade, concat(date_format(date, '%Y'),'.',date_format(date, '%m'),'.',date_format(date, '%d')) as start_day,
+                     case weekday(date) when 0 then '(월)' when 1 then '(화)' when 2 then '(수)'
+                                        when 3 then '(목)' when 4 then '(금)' when 5 then '(금)'
+                                        when 6 then '(토)' when 7 then '(일)' end as day,
+                     branch_name, concat(theater_idx,'관') as theater,
+                     concat(time_format(start_time, '%H:%i'),'~',time_format(end_time, '%H:%i')) as start_time,
+                     concat('일반 ',(select count(*) from THEATER_SEAT,TICKET_CHECK
+                                    where TICKET_CHECK.theater_info_idx=THEATER_SEAT.theater_info_idx and TICKET_CHECK.user_idx=? and
+                                          TICKET_CHECK.user_idx=THEATER_SEAT.user_idx and status = 1),'명') as person
+
+              from MOVIE, TICKET_CHECK, THEATER_INFO, BRANCH, THEATER_SEAT
+              where THEATER_INFO.theater_info_idx = TICKET_CHECK.theater_info_idx and THEATER_INFO.movie_idx = MOVIE.movie_idx and
+                    BRANCH.branch_idx = THEATER_INFO.branch_idx and THEATER_SEAT.theater_info_idx = THEATER_INFO.theater_info_idx and
+                    TICKET_CHECK.user_idx = ? limit 1;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx,$user_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['ticket_info'] = $st->fetchAll();
+
+    $query = "select seat_type
+              from TICKET_CHECK, THEATER_SEAT
+              where TICKET_CHECK.theater_info_idx = TICKET_CHECK.theater_info_idx and THEATER_SEAT.user_idx = TICKET_CHECK.user_idx and
+                    TICKET_CHECK.user_idx = ? and THEATER_SEAT.theater_info_idx = ? and updated_at is null;";
+    $st = $pdo->prepare($query);
+    $st->execute([$user_idx, $theater_info_idx]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res['ticket_seat'] = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
 }
