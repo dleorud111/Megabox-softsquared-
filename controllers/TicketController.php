@@ -286,7 +286,7 @@ try {
             $res->result = postPayment($user_idx,$order_id,$sale_price,$total_price);
             $res->is_success = TRUE;
             $res->code = 100;
-            $res->message = "결제 성공";
+            $res->message = "결제 화면 준비 성공";
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 

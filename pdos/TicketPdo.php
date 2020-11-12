@@ -574,7 +574,8 @@ function getMobileTicket($user_idx, $theater_info_idx){
                      concat(time_format(start_time, '%H:%i'),'~',time_format(end_time, '%H:%i')) as start_time,
                      concat('일반 ',(select count(*) from THEATER_SEAT,TICKET_CHECK
                                     where TICKET_CHECK.theater_info_idx=THEATER_SEAT.theater_info_idx and TICKET_CHECK.user_idx=? and
-                                          TICKET_CHECK.user_idx=THEATER_SEAT.user_idx and TICKET_CHECK.status = 1),'명') as person
+                                          TICKET_CHECK.user_idx=THEATER_SEAT.user_idx and TICKET_CHECK.status = 1 and
+                                          is_deleted = 0),'명') as person
 
               from MOVIE, TICKET_CHECK, THEATER_INFO, BRANCH, THEATER_SEAT
               where THEATER_INFO.theater_info_idx = TICKET_CHECK.theater_info_idx and THEATER_INFO.movie_idx = MOVIE.movie_idx and
@@ -589,7 +590,8 @@ function getMobileTicket($user_idx, $theater_info_idx){
     $query = "select seat_type
               from TICKET_CHECK, THEATER_SEAT
               where TICKET_CHECK.theater_info_idx = TICKET_CHECK.theater_info_idx and THEATER_SEAT.user_idx = TICKET_CHECK.user_idx and
-                    TICKET_CHECK.user_idx = ? and THEATER_SEAT.theater_info_idx = ? and updated_at is null;";
+                    TICKET_CHECK.user_idx = ? and THEATER_SEAT.theater_info_idx = ? and updated_at is null
+                    and TICKET_CHECK.status = 1 and is_deleted = 0;";
     $st = $pdo->prepare($query);
     $st->execute([$user_idx, $theater_info_idx]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
