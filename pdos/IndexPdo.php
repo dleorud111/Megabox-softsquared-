@@ -152,3 +152,27 @@ function getTheaterInfoIdx($branch, $theater, $date, $time)
 
     return $res;
 }
+
+// 푸쉬 알림
+function pushAlarm($fcm_token)
+{
+    $server_key = "AAAA3wlKw4U:APA91bGm4GWmI-XfVUHUv8GXGwqaBQst0f8tlBlkqdfWiSMK5M26PkhoIQBHHYM0xsag5IHSVCl5-mNCMp9euqWiE3zdCyyebyTjgY-CSc0F21bOGFCD5w3ppPx4tsTFFCaZ2S1ttBR3";
+    $title = "영화 상영 정보";
+    $body = "영화 상영 15분 전입니다.";
+    $notification = array('title' => $title, 'body' => $body, 'sound' => 'default', 'badge' => '1');
+    $arrayToSend = array('to' => $fcm_token, 'notification' => $notification, 'priority' => 'high');
+    $json = json_encode($arrayToSend);
+    $headers = array('Authorization: key=' . $server_key, 'Content-Type: application/json');
+    $url = 'https://fcm.googleapis.com/fcm/send';
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $result = curl_exec($ch);
+    curl_close($ch);
+
+    return json_decode($result, true);
+}

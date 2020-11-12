@@ -157,10 +157,10 @@ function getRestSeat($theater_info_idx){
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res['theater_info'] = $st->fetchAll();
 
-    $query = "select seat_type
+    $query = "select seat_type, status
               from THEATER_INFO, THEATER_SEAT
               where THEATER_INFO.theater_info_idx = THEATER_SEAT.theater_info_idx and
-                    THEATER_INFO.theater_info_idx = ? and user_idx is null;";
+                    THEATER_INFO.theater_info_idx = ?;";
 
     $st = $pdo->prepare($query);
     $st->execute([$theater_info_idx]);
@@ -204,6 +204,9 @@ function putSeat($user_idx,$theater_info_idx,$seat){
             $query = "update THEATER_SEAT set user_idx = ? where theater_info_idx = ? and seat_type = ?;";
             $st = $pdo->prepare($query);
             $st->execute([$user_idx, $theater_info_idx, $seat_type]);
+            $query = "update THEATER_SEAT set status = 'Y' where user_idx = ? and theater_info_idx = ? and seat_type = ? and status = 'N';";
+            $st = $pdo->prepare($query);
+            $st->execute([$user_idx, $theater_info_idx, $seat_type]);
         }
         $query1 = "insert into TICKET_CHECK (user_idx, theater_info_idx, all_price, total_price, created_at)
                    select user_idx, theater_info_idx, count(*)*10000 as all_price, count(*)*10000 as total_price, now()
@@ -211,7 +214,7 @@ function putSeat($user_idx,$theater_info_idx,$seat){
 
         $query2 = "select concat(count(*)*10000 div 1000,',', '000원') as price
                   from THEATER_SEAT
-                  where theater_info_idx = ? and user_idx = ?;";
+                  where theater_info_idx = ? and user_idx = ? and status = 'Y';";
 
         $st = $pdo->prepare($query1);
         $st->execute([$user_idx, $theater_info_idx]);
@@ -226,6 +229,40 @@ function putSeat($user_idx,$theater_info_idx,$seat){
         $pdo = null;
 
         return $res;
+
+    } catch (Exception $exception){
+        $pdo->rollback();
+    }
+
+}
+
+// 좌석 취소
+function delSeat($user_idx,$theater_info_idx,$seat){
+    $pdo = pdoSqlConnect();
+    try{
+        $pdo->beginTransaction();
+        $seat_split = explode(" ",$seat);
+
+        foreach ($seat_split as $seat_type){
+            $query = "update THEATER_SEAT set status = 'N' where user_idx = ? and theater_info_idx = ? and seat_type = ? and status = 'Y';";
+            $st = $pdo->prepare($query);
+            $st->execute([$user_idx, $theater_info_idx, $seat_type]);
+            $query = "update THEATER_SEAT set user_idx = null where user_idx = ? and theater_info_idx = ? and seat_type = ?;";
+            $st = $pdo->prepare($query);
+            $st->execute([$user_idx, $theater_info_idx, $seat_type]);
+        }
+        $query1 = "update TICKET_CHECK set is_deleted = 1 where user_idx=? and theater_info_idx=? and is_deleted = 0;";
+
+
+        $st = $pdo->prepare($query1);
+        $st->execute([$user_idx, $theater_info_idx]);
+
+
+        $pdo->commit();
+        $st = null;
+        $pdo = null;
+
+
 
     } catch (Exception $exception){
         $pdo->rollback();
@@ -312,7 +349,7 @@ function getOrderId($user_idx)
     $pdo = pdoSqlConnect();
     $query = "select ticket_check_idx, sale_price, total_price
               from TICKET_CHECK
-              where user_idx = ? and status = 0;";
+              where user_idx = ? and status = 0 and is_deleted = 0";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_idx]);
@@ -328,7 +365,7 @@ function getSalePrice($user_idx)
     $pdo = pdoSqlConnect();
     $query = "select ticket_check_idx, sale_price, total_price
               from TICKET_CHECK
-              where user_idx = ? and status = 0;";
+              where user_idx = ? and status = 0 and is_deleted = 0;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_idx]);
@@ -344,7 +381,7 @@ function getTotalPrice($user_idx)
     $pdo = pdoSqlConnect();
     $query = "select ticket_check_idx, sale_price, total_price
               from TICKET_CHECK
-              where user_idx = ? and status = 0;";
+              where user_idx = ? and status = 0 and is_deleted = 0;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_idx]);
@@ -404,9 +441,9 @@ function postPayment($user_idx,$order_id,$sale_price,$total_price)
     $strArrResult = json_decode($strArrResult[0]);
 
 
-    setcookie("user_id", $user_idx, time() + 60);
-    setcookie("kakao_order_id", '5', time() + 60);
-    setcookie("kakao_tid", $strArrResult->tid, time() + 60);
+    setcookie("user_id", $user_idx, time() + 90);
+    setcookie("kakao_order_id", $order_id, time() + 90);
+    setcookie("kakao_tid", $strArrResult->tid, time() + 90);
 
     echo "<script>";
     echo "var win = window.open('','','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,width=540,height=700,left=100,top=100');";
@@ -442,18 +479,18 @@ function CallPaymentKakaoPaySuccess($user_idx, $pg_token)
     $strArrResult = request_curl('https://kapi.kakao.com/v1/payment/approve', 1, http_build_query($kakao_params), $kakao_header);
 
     $IS_PAYMENT_SUCCESS = false;
-
-    if ($strArrResult[3] != '200') {
-        echo "<script>";
-        echo "alert('에러입니다. 관리자에게 문의하세요.');";
-        echo "window.parent.close();";
-        echo "</script>";
-        return;
-    }
-
     setcookie("user_id", '', time() - 3600);
     setcookie("kakao_order_id", '', time() - 3600);
-    setcookie("kakao_tid", '$strArrResult->tid', time() - 3600);
+    setcookie("kakao_tid", '', time() - 3600);
+
+//    if ($strArrResult[3] != '200') {
+//        echo "<script>";
+//        echo "alert('에러입니다. 관리자에게 문의하세요.');";
+//        echo "window.parent.close();";
+//        echo "</script>";
+//        return;
+//    }
+
 //    $strArrResult = json_decode($strArrResult[0]);
 
     // LGD 로 쓰는 이유는 기존 table를 활용해서 같이쓰기위함.
@@ -478,7 +515,7 @@ function CallPaymentKakaoPaySuccess($user_idx, $pg_token)
 //    );
 
     $pdo = pdoSqlConnect();
-    $query = "update TICKET_CHECK set status = 1 where user_idx = ? and status = 0;";
+    $query = "update TICKET_CHECK set status = 1 where user_idx = ? and status = 0 and is_deleted = 0;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_idx]);
@@ -498,7 +535,7 @@ function getTicketPayed($user_idx){
                      branch_name
               from TICKET_CHECK, THEATER_INFO, MOVIE, BRANCH
               where TICKET_CHECK.theater_info_idx = THEATER_INFO.theater_info_idx and THEATER_INFO.movie_idx = MOVIE.movie_idx and
-                    THEATER_INFO.branch_idx = BRANCH.branch_idx and user_idx = ?;";
+                    THEATER_INFO.branch_idx = BRANCH.branch_idx and user_idx = ? and status = 1;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_idx]);
@@ -514,7 +551,7 @@ function getTicketPayed($user_idx){
 function getTheaterInfo($user_idx)
 {
     $pdo = pdoSqlConnect();
-    $query = "select theater_info_idx from TICKET_CHECK where user_idx = ? and updated_at is null;";
+    $query = "select theater_info_idx from TICKET_CHECK where user_idx = ? and updated_at is null and is_deleted = 0;";
 
     $st = $pdo->prepare($query);
     $st->execute([$user_idx]);
@@ -537,7 +574,7 @@ function getMobileTicket($user_idx, $theater_info_idx){
                      concat(time_format(start_time, '%H:%i'),'~',time_format(end_time, '%H:%i')) as start_time,
                      concat('일반 ',(select count(*) from THEATER_SEAT,TICKET_CHECK
                                     where TICKET_CHECK.theater_info_idx=THEATER_SEAT.theater_info_idx and TICKET_CHECK.user_idx=? and
-                                          TICKET_CHECK.user_idx=THEATER_SEAT.user_idx and status = 1),'명') as person
+                                          TICKET_CHECK.user_idx=THEATER_SEAT.user_idx and TICKET_CHECK.status = 1),'명') as person
 
               from MOVIE, TICKET_CHECK, THEATER_INFO, BRANCH, THEATER_SEAT
               where THEATER_INFO.theater_info_idx = TICKET_CHECK.theater_info_idx and THEATER_INFO.movie_idx = MOVIE.movie_idx and

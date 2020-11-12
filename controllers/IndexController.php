@@ -181,6 +181,48 @@ try {
             echo json_encode($res, JSON_NUMERIC_CHECK);
             break;
 
+        /*
+         * API No. 30
+         * API Name : 푸쉬알림 API
+         * 마지막 수정 날짜 : 19.04.29
+         */
+
+        case "pushAlarm":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+
+            if(!isset($jwt) || $jwt == null){
+                $res->is_success = FALSE;
+                $res->code = 201;
+                $res->message = "로그인 후 이용가능한 서비스입니다(jwt를 header에 입력하세요)";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            if(!isValidHeader($jwt, JWT_SECRET_KEY)) {
+                $res->is_success = FALSE;
+                $res->code = 202;
+                $res->message = "잘못된 토큰입니다";
+                echo json_encode($res, JSON_NUMERIC_CHECK);
+                break;
+            }
+
+            //클라로 부터 받는 토큰 값
+            $fcm_token = "";
+
+            $res->result = pushAlarm($fcm_token);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "푸쉬알림 성공";
+            echo json_encode($res, JSON_NUMERIC_CHECK);
+            break;
+
+
+
+
+
         //client 요구 API
         case "getTheaterInfoIdx":
             http_response_code(200);

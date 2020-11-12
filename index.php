@@ -93,6 +93,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('GET', '/mobile-ticket', ['TicketController', 'getMobileTicket']); //모바일티켓 조회 API
 
+    $r->addRoute('PATCH', '/movie-seat/deleting', ['TicketController', 'delSeat']); //좌석 취소 API
+
     /* ******************************** 스토어 관련 기능 ******************************** */
 
     $r->addRoute('GET', '/store', ['StoreController', 'getTodayMenu']); //오늘의 메뉴 조회(스토어 상단) API
@@ -101,6 +103,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('GET', '/store/popcorn-drink-goods', ['StoreController', 'getMenus']); //팝콘, 음료, 굿즈 상품 조회(스토어 하단) API
 
+    /* ******************************** 스토어 관련 기능 ******************************** */
+    $r->addRoute('GET', '/pushAlarm', ['IndexController', 'pushAlarm']); //푸쉬 알림 API
 
 
     /* ******************************** client 요구 API ******************************** */
