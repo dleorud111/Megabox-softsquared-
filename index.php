@@ -108,8 +108,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
 
     /* ******************************** client 요구 API ******************************** */
-    $r->addRoute('GET', '/branch/{branch}/theater/{theater}/date/{date}/time/{time}', ['IndexController', 'getTheaterInfoIdx']);
+    $r->addRoute('GET', '/branch/{branch}/theater/{theater}/date/{date}/time/{time}', ['IndexController', 'getTheaterInfoIdx']); //영화관 index 조회
 
+    $r->addRoute('GET', '/user-info', ['IndexController', 'getUserInfo']);
 
 //    $r->addRoute('GET', '/users', 'get_all_users_handler');
 //    // {id} must be a number (\d+)

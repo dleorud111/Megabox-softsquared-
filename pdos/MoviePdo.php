@@ -21,7 +21,8 @@ function getMovies()
                         end as star,
                     zzim
              from MOVIE, (SELECT @RANK := 0) r
-             order by reservation desc;";
+             order by reservation desc
+             limit 5;";
 
     $st = $pdo->prepare($query);
     $st->execute();

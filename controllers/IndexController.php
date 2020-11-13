@@ -75,7 +75,6 @@ try {
         /*
          * API No. 1
          * API Name : 자체 로그인 API
-         * 마지막 수정 날짜 : 19.04.29
          */
 
         case "login":
@@ -134,7 +133,6 @@ try {
         /*
          * API No. 2
          * API Name : 회원가입 API
-         * 마지막 수정 날짜 : 19.04.29
          */
 
         case "postUser":
@@ -184,7 +182,6 @@ try {
         /*
          * API No. 30
          * API Name : 푸쉬알림 API
-         * 마지막 수정 날짜 : 19.04.29
          */
 
         case "pushAlarm":
@@ -222,8 +219,8 @@ try {
 
 
 
-
-        //client 요구 API
+/* ***************************************** client 요구 API ***************************************** */
+        //영화관 index 조회
         case "getTheaterInfoIdx":
             http_response_code(200);
 
@@ -238,9 +235,22 @@ try {
             $res->message = "theater_info_idx 찾기";
             echo json_encode($res,JSON_NUMERIC_CHECK);
 
-
             break;
 
+        //회원 이름 아이디 조회
+        case "getUserInfo":
+            http_response_code(200);
+
+            $jwt = $_SERVER['HTTP_X_ACCESS_TOKEN'];
+            $user_idx = getDataByJWToken($jwt, JWT_SECRET_KEY)->userIdx;
+
+            $res->result = getUserInfo($user_idx);
+            $res->is_success = TRUE;
+            $res->code = 100;
+            $res->message = "회원 이름 아이디 조회 성공";
+            echo json_encode($res,JSON_NUMERIC_CHECK);
+
+            break;
 
 
 

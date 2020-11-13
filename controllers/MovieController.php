@@ -27,7 +27,6 @@ try {
         /*
          * API No. 3
          * API Name : 메인화면 영화 나열 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMovies":
             http_response_code(200);
@@ -65,7 +64,6 @@ try {
         /*
          * API No. 4
          * API Name : 영화 간단 소개 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMovieIntro":
             http_response_code(200);
@@ -92,7 +90,6 @@ try {
         /*
          * API No. 5
          * API Name : 영화 상세 정보 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMovieInfo":
             http_response_code(200);
@@ -117,7 +114,6 @@ try {
         /*
          * API No. 6
          * API Name : 영화 실관람평 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMovieReview":
             http_response_code(200);
@@ -143,7 +139,6 @@ try {
         /*
          * API No. 7
          * API Name : 영화 실관람평 쓰기 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "postMovieReview":
             http_response_code(200);
@@ -206,7 +201,6 @@ try {
         /*
          * API No. 8
          * API Name : 영화 실관람평에 좋아요 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "chgReviewLike":
             http_response_code(200);
@@ -244,7 +238,6 @@ try {
         /*
          * API No. 9
          * API Name : 영화 보고싶어 누르기 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "chgMovieHeart":
             http_response_code(200);
@@ -280,7 +273,6 @@ try {
         /*
          * API No. 10
          * API Name : 극장 좋아요 누르기 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "chgBranchLike":
             http_response_code(200);
@@ -316,7 +308,6 @@ try {
         /*
          * API No. 19
          * API Name : 영화 무비 포스트 전체 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMoviePost":
             http_response_code(200);
@@ -341,7 +332,6 @@ try {
         /*
          * API No. 20
          * API Name : 영화 무비 포스트 상세 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMoviePostDetail":
             http_response_code(200);
@@ -367,7 +357,6 @@ try {
         /*
          * API No. 21
          * API Name : 영화 무비 포스트 쓰기 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "postMoviePost":
             http_response_code(200);
@@ -428,7 +417,6 @@ try {
         /*
          * API No. 22
          * API Name : 영화 무비 포스트 댓글 쓰기 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "postMoviePostComment":
             http_response_code(200);
@@ -480,7 +468,6 @@ try {
         /*
          * API No. 23
          * API Name : 영화 무비 포스트 좋아요 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "chgMoviePostLike":
             http_response_code(200);

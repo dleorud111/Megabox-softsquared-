@@ -153,6 +153,24 @@ function getTheaterInfoIdx($branch, $theater, $date, $time)
     return $res;
 }
 
+// 회원 이름 아이디 조회
+function getUserInfo($uesr_idx)
+{
+    $pdo = pdoSqlConnect();
+    $query = "select name, id from USER where idx = ?;";
+
+    $st = $pdo->prepare($query);
+    $st->execute([$uesr_idx]);
+    $st->execute();
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
 // 푸쉬 알림
 function pushAlarm($fcm_token)
 {

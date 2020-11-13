@@ -27,7 +27,6 @@ try {
         /*
          * API No. 11
          * API Name : 바로예매(지점 조회) API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getBranchDirectTicketing":
             http_response_code(200);
@@ -52,7 +51,6 @@ try {
         /*
          * API No. 12
          * API Name : 바로 예매(관,시간 조회) API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getTheaterDirectTicketing":
             http_response_code(200);
@@ -86,7 +84,6 @@ try {
         /*
          * API No. 13
          * API Name : 극장별 예매(지점 조회) API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getBranchTicketing":
             http_response_code(200);
@@ -103,7 +100,6 @@ try {
         /*
          * API No. 14
          * API Name : 극장별 예매(관,시간 조회) API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getTheaterBranchTicketing":
             http_response_code(200);
@@ -128,7 +124,6 @@ try {
         /*
          * API No. 15
          * API Name : 영화별 예매(포스터 나열) API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMovieTicketing":
             http_response_code(200);
@@ -143,7 +138,6 @@ try {
         /*
          * API No. 16
          * API Name : 해당 영화관 남은 좌석 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getRestSeat":
             http_response_code(200);
@@ -169,7 +163,6 @@ try {
         /*
          * API No. 17
          * API Name : 좌석 선택 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "putSeat":
             http_response_code(200);
@@ -222,7 +215,6 @@ try {
         /*
          * API No. 18
          * API Name : 예매 확인 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getTicket":
             http_response_code(200);
@@ -293,7 +285,6 @@ try {
         /*
          * API No. 27
          * API Name : 티켓 결제 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getPayment":
             http_response_code(200);
@@ -330,7 +321,6 @@ try {
         /*
          * API No. 28
          * API Name : 예매/주문 내역 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getTicketPayed":
             http_response_code(200);
@@ -365,7 +355,6 @@ try {
         /*
          * API No. 29
          * API Name : 모바일 티켓 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "getMobileTicket":
             http_response_code(200);
@@ -401,7 +390,6 @@ try {
         /*
          * API No. 31
          * API Name : 좌석 취소 API
-         * 마지막 수정 날짜 : 19.04.29
          */
         case "delSeat":
             http_response_code(200);

@@ -75,7 +75,6 @@ try {
         /*
          * API No. 24
          * API Name : 오늘의 메뉴(스토어 상단) 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
 
         case "getTodayMenu":
@@ -93,7 +92,6 @@ try {
         /*
          * API No. 25
          * API Name : 메가티켓 조회(스토어 하단) 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
 
         case "getMegaTicket":
@@ -110,7 +108,6 @@ try {
         /*
          * API No. 26
          * API Name : 팝콘, 음료, 굿즈 상품 조회(스토어 하단) 조회 API
-         * 마지막 수정 날짜 : 19.04.29
          */
 
         case "getMenus":
